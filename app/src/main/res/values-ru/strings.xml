@@ -4,8 +4,8 @@
     <string name="super_user_granted">Доступ выдан</string>
     <string name="super_user_denied">Неудача выдачи доступа</string>
     <string name="app_needs_root">Это приложение работает только с правами суперпользователя. Убедитесь, что они у вас есть и вы можете их предоставить.</string>
-    <string name="apply">Применить</string>
-    <string name="reset">Сбросить</string>
+    <string name="apply">Принять</string>
+    <string name="reset">Сброс</string>
     <string name="percent">Процент батареи</string>
     <string name="usb_conn">Подключение USB</string>
     <string name="invalid">Неверный</string>
