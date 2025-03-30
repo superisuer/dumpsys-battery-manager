@@ -18,4 +18,5 @@
     <string name="alert_t">Confirmation</string>
     <string name="shizuki">Via Shizuku</string>
     <string name="notneeded">No need</string>
+    <string name="force">Force</string>
 </resources>

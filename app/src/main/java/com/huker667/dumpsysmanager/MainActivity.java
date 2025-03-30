@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private Button reset_button;
     private CheckBox invalid_checkbox;
+    private CheckBox force_checkbox;
     private EditText numtext;
     @SuppressLint("CutPasteId")
     @Override
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         temp_text = findViewById(R.id.textView3);
         reset_button = findViewById(R.id.button4);
         reset_button.setEnabled(false);
+        force_checkbox = findViewById(R.id.checkBox3);
         seekBar = findViewById(R.id.seekBar);
         apply_button.setEnabled(false);
         shizuku_button = findViewById(R.id.button6);
@@ -143,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 shizuku_button.setEnabled(false);
                 via_shizuku = true;
             } else {
-                // Запросить разрешение
                 Shizuku.requestPermission(123);
             }
         }
@@ -233,10 +234,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public String executeCommand(String command) {
+        if (force_checkbox.isChecked()){
+            if (!command.endsWith("battery")){
+                command = command + " -f";
+            }
+
+        }
         if (via_shizuku) {
             return executeShizukiCommand(command);
         }
-        // Если доступен Shizuku - используем Shizuku
         else if (!via_shizuku) {
             return executeRootCommand(command);
         }
@@ -286,8 +292,6 @@ public class MainActivity extends AppCompatActivity {
                     currentDir += "/";
                 }
             }
-
-            // Wait for process completion
             process.waitFor();
 
         } catch (Exception e) {

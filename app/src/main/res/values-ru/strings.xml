@@ -4,7 +4,7 @@
     <string name="super_user_granted">Доступ выдан</string>
     <string name="super_user_denied">Неудача выдачи доступа</string>
     <string name="app_needs_root">Это приложение работает только с правами суперпользователя. Убедитесь, что они у вас есть и вы можете их предоставить.</string>
-    <string name="apply">Принять</string>
+    <string name="apply">Применить</string>
     <string name="reset">Сброс</string>
     <string name="percent">Процент батареи</string>
     <string name="usb_conn">Подключение USB</string>
@@ -17,4 +17,5 @@
     <string name="alert_t">Подтверждение</string>
     <string name="shizuki">Через Shizuku</string>
     <string name="notneeded">Уже есть</string>
+    <string name="force">Принудительно</string>
 </resources>
