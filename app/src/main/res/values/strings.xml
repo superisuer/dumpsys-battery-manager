@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">dumpsys manager</string>
+    <string name="app_name" translatable="false">Dumpsys Battery Manager</string>
     <string name="grant_root">Grant superuser rights</string>
     <string name="super_user_granted">Access granted</string>
     <string name="super_user_denied">Failure to grant access</string>
