@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name" translatable="false">dumpsys manager</string>
+    <string name="grant_root">Grant superuser rights</string>
+    <string name="super_user_granted">Access granted</string>
+    <string name="super_user_denied">Failure to grant access</string>
+    <string name="app_needs_root">This application only works through superuser rights. Make sure you have them and can grant them.</string>
+    <string name="apply">Apply</string>
+    <string name="reset">Reset</string>
+    <string name="battery" translatable="false">battery</string>
+    <string name="percent">Battery Percentage</string>
+    <string name="usb_conn">USB connection</string>
+    <string name="invalid">Invalid</string>
+    <string name="mka_entry">Enter µA</string>
+    <string name="temp">Temperature</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="alert_d">Are you sure you want to change the values? This may affect the operation of the device.</string>
+    <string name="alert_t">Confirmation</string>
+</resources>
