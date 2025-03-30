@@ -16,4 +16,6 @@
     <string name="no">No</string>
     <string name="alert_d">Are you sure you want to change the values? This may affect the operation of the device.</string>
     <string name="alert_t">Confirmation</string>
+    <string name="shizuki">Via Shizuku</string>
+    <string name="notneeded">No need</string>
 </resources>

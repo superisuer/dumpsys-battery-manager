@@ -11,7 +11,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "101"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,7 +32,9 @@ android {
 }
 
 dependencies {
-
+    implementation("dev.rikka.shizuku:api:13.1.0")
+    implementation("dev.rikka.shizuku:provider:13.1.0")
+    //compileOnly("dev.rikka.shizuku:api-stub:13.1.5")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

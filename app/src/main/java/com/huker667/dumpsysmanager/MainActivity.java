@@ -3,7 +3,12 @@ package com.huker667.dumpsysmanager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -15,8 +20,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CheckBox;
 
+import rikka.shizuku.Shizuku;
+import rikka.shizuku.ShizukuRemoteProcess;
+import rikka.shizuku.ShizukuProvider;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
@@ -26,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private Button battery_button;
     private Button apply_button;
     private TextView temp_text;
+    private Boolean via_shizuku;
+    private Button shizuku_button;
     private EditText mkatext;
     private CheckBox usb_checkbox;
     private SeekBar seekBar;
@@ -46,12 +60,20 @@ public class MainActivity extends AppCompatActivity {
         reset_button.setEnabled(false);
         seekBar = findViewById(R.id.seekBar);
         apply_button.setEnabled(false);
+        shizuku_button = findViewById(R.id.button6);
         battery_button.setEnabled(false);
         mkatext = findViewById(R.id.editTextNumberSigned2);
         superUserButton = findViewById(R.id.button);
         superUserButton.setText(R.string.grant_root);
         TextView outputtext = findViewById(R.id.textView2);
         numtext = findViewById(R.id.editTextNumberSigned);
+
+        shizuku_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestShizukuPermission();
+            }
+        });
         superUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,6 +131,28 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    private void requestShizukuPermission() {
+        try {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                superUserButton.setEnabled(false);
+                battery_button.setEnabled(true);
+                apply_button.setEnabled(true);
+                reset_button.setEnabled(true);
+                superUserButton.setText(R.string.notneeded);
+                shizuku_button.setText(R.string.super_user_granted);
+                shizuku_button.setEnabled(false);
+                via_shizuku = true;
+            } else {
+                // Запросить разрешение
+                Shizuku.requestPermission(123);
+            }
+        }
+        catch (Exception e) {
+            Log.e("error", "NO SHIZUKU FOUND.");
+        }
+    }
+
+
     @SuppressLint("SetTextI18n")
     private void getValues(){
         if (Objects.equals(executeCommand("dumpsys battery get usb").trim(), "false")) {
@@ -152,6 +196,9 @@ public class MainActivity extends AppCompatActivity {
                 apply_button.setEnabled(true);
                 reset_button.setEnabled(true);
                 superUserButton.setText(R.string.super_user_granted);
+                shizuku_button.setEnabled(false);
+                shizuku_button.setText(R.string.notneeded);
+                via_shizuku = false;
                 getValues();
             } else {
                 throw new Exception("Access denied");
@@ -166,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public String executeCommand(String command) {
+    public String executeRootCommand(String command) {
         try {
             Process process = Runtime.getRuntime().exec("su -c " + command);
             process.waitFor();
@@ -185,6 +232,72 @@ public class MainActivity extends AppCompatActivity {
             return "Failed to execute: " + command + ". Check that you have granted access to root permissions. (" + e + ")";
         }
     }
+    public String executeCommand(String command) {
+        if (via_shizuku) {
+            return executeShizukiCommand(command);
+        }
+        // Если доступен Shizuku - используем Shizuku
+        else if (!via_shizuku) {
+            return executeRootCommand(command);
+        }
+        else {
+            return "Error: Neither root nor Shizuku available.";
+        }
+    }
 
+    private String executeShizukiCommand(String command) {
+        List<String> output = new ArrayList<>();
+        ShizukuRemoteProcess process = null;
+        String currentDir = "/";
+        StringBuilder result = new StringBuilder();
 
+        try {
+            // Execute the command
+            process = Shizuku.newProcess(new String[]{"sh", "-c", command}, null, currentDir);
+
+            // Read output streams
+            try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+
+                String line;
+                while ((line = inputReader.readLine()) != null) {
+                    output.add(line);
+                    result.append(line).append("\n");
+                }
+
+                while ((line = errorReader.readLine()) != null) {
+                    output.add(line);
+                    result.append("ERROR: ").append(line).append("\n");
+                }
+            }
+
+            // Handle directory changes
+            if (command.startsWith("cd ") && !output.isEmpty() && !output.get(output.size() - 1).startsWith("ERROR:")) {
+                String[] parts = command.split("\\s+");
+                String newDir = parts.length > 1 ? parts[1] : "/";
+
+                if (newDir.startsWith("/")) {
+                    currentDir = newDir;
+                } else {
+                    currentDir += newDir;
+                }
+
+                if (!currentDir.endsWith("/")) {
+                    currentDir += "/";
+                }
+            }
+
+            // Wait for process completion
+            process.waitFor();
+
+        } catch (Exception e) {
+            result.append("Exception: ").append(e.getMessage()).append("\n");
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
+        return result.toString().trim();
+    }
 }

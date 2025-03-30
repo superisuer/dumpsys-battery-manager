@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="grant_root">Дать права суперпользователя</string>
+    <string name="grant_root">Выдать ROOT-права</string>
     <string name="super_user_granted">Доступ выдан</string>
     <string name="super_user_denied">Неудача выдачи доступа</string>
     <string name="app_needs_root">Это приложение работает только с правами суперпользователя. Убедитесь, что они у вас есть и вы можете их предоставить.</string>
@@ -15,4 +15,6 @@
     <string name="no">Нет</string>
     <string name="alert_d">Вы уверены, что хотите изменить значения? Это может повлиять на работу устройства.</string>
     <string name="alert_t">Подтверждение</string>
+    <string name="shizuki">Через Shizuku</string>
+    <string name="notneeded">Уже есть</string>
 </resources>
