@@ -143,6 +143,7 @@
         android:ems="10"
         android:hint="@string/mka_entry"
         android:inputType="numberSigned"
+        android:minHeight="48dp"
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -2,6 +2,8 @@ package com.huker667.dumpsysmanager;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +21,8 @@ import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuRemoteProcess;
 
 import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.InputStreamReader;
@@ -42,6 +46,17 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            StringWriter sw = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(sw));
+            String error = sw.toString();
+
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Crash", error);
+            clipboard.setPrimaryClip(clip);
+            Objects.requireNonNull(Thread.getDefaultUncaughtExceptionHandler()).uncaughtException(thread, throwable);
+        });
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         battery_button = findViewById(R.id.button2);
@@ -130,29 +145,43 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void getValues(){
-        
-        if (Objects.equals(executeCommand("dumpsys battery get usb").trim(), "false")) {
+
+        if (executeCommand("dumpsys battery get usb").trim().contains("false")) {
             usb_checkbox.setChecked(false);
         }
-        else if (Objects.equals(executeCommand("dumpsys battery get usb").trim(), "true")) {
+        else if (executeCommand("dumpsys battery get usb").trim().contains("true")) {
             usb_checkbox.setChecked(true);
         }
-        if (Objects.equals(executeCommand("dumpsys battery get invalid").trim(), "0")) {
+        if (executeCommand("dumpsys battery get invalid").trim().contains("0")) {
             invalid_checkbox.setChecked(false);
         }
-        else if (Objects.equals(executeCommand("dumpsys battery get invalid").trim(), "1")) {
+        else if (executeCommand("dumpsys battery get invalid").trim().contains("1")) {
             invalid_checkbox.setChecked(true);
         }
-        numtext.setText(executeCommand("dumpsys battery get level").trim());
-        mkatext.setText(executeCommand("dumpsys battery get counter").trim());
-        seekBar.setProgress(Integer.parseInt(executeCommand("dumpsys battery get temp").trim()));
-        int temp = Integer.parseInt(executeCommand("dumpsys battery get temp").trim());
+
+
+        String levelStr = extractDigits(executeCommand("dumpsys battery get level").trim());
+        String counterStr = extractDigits(executeCommand("dumpsys battery get counter").trim());
+        String tempStr = extractDigits(executeCommand("dumpsys battery get temp").trim());
+
+        numtext.setText(levelStr);
+        mkatext.setText(counterStr);
+
+        int temp = Integer.parseInt(tempStr);
+        seekBar.setProgress(temp);
+
         double tempCelsius = temp / 10.0;
-        @SuppressLint("DefaultLocale") String result = String.format("%.1f °C", tempCelsius);
+        @SuppressLint("DefaultLocale")
+        String result = String.format("%.1f °C", tempCelsius);
         temp_text.setText(getString(R.string.temp) + " (" + result + ")");
-        
+
+
 
     }
+    private String extractDigits(String input) { // FOR OPLUS CHANGED DUMPSYS
+        return input.replaceAll("[^0-9]", "");
+    }
+
     private void requestSuperUser() {
         
         try {
