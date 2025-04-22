@@ -94,10 +94,7 @@ public class MainActivity extends AppCompatActivity {
                             outputtext.setText(outputtext.getText() + "\n" + executeCommand("dumpsys battery set counter " + mkatext.getText().toString()));
                             outputtext.setText(outputtext.getText() + "\n" + executeCommand("dumpsys battery set temp " + seekBar.getProgress()));
 
-                            int temp = Integer.parseInt(executeCommand("dumpsys battery get temp").trim());
-                            double tempCelsius = temp / 10.0;
-                            @SuppressLint("DefaultLocale") String result = String.format("%.1f °C", tempCelsius);
-                            temp_text.setText(getString(R.string.temp) + " (" + result + ")");
+                            getValues();
                         })
                         .setNegativeButton(getString(R.string.no), null)
                         .show();
