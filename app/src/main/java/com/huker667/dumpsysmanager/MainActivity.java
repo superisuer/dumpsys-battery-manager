@@ -12,10 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuRemoteProcess;
@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Toast.makeText(getApplicationContext(), "The app is crashed!", Toast.LENGTH_SHORT).show();
             StringWriter sw = new StringWriter();
             throwable.printStackTrace(new PrintWriter(sw));
             String error = sw.toString();
@@ -145,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void getValues(){
-
         if (executeCommand("dumpsys battery get usb").trim().contains("false")) {
             usb_checkbox.setChecked(false);
         }
@@ -159,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
             invalid_checkbox.setChecked(true);
         }
 
-
         String levelStr = extractDigits(executeCommand("dumpsys battery get level").trim());
         String counterStr = extractDigits(executeCommand("dumpsys battery get counter").trim());
         String tempStr = extractDigits(executeCommand("dumpsys battery get temp").trim());
@@ -168,18 +167,15 @@ public class MainActivity extends AppCompatActivity {
         mkatext.setText(counterStr);
 
         int temp = Integer.parseInt(tempStr);
-        seekBar.setProgress(temp);
 
+        seekBar.setProgress(temp);
         double tempCelsius = temp / 10.0;
         @SuppressLint("DefaultLocale")
         String result = String.format("%.1f °C", tempCelsius);
         temp_text.setText(getString(R.string.temp) + " (" + result + ")");
-
-
-
     }
-    private String extractDigits(String input) { // FOR OPLUS CHANGED DUMPSYS
-        return input.replaceAll("[^0-9]", "");
+    private String extractDigits(String input) { // REGEX FOR OPLUS BATTERY
+        return input.replaceAll("\\D", "");
     }
 
     private void requestSuperUser() {
@@ -209,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
                 getValues();
                 
             } else {
-                
                 throw new Exception("Access denied");
             }
 
@@ -261,8 +256,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String executeShizukiCommand(String command) {
-        // этот код я спиздил из ashell
-        
+        // этот код я спиздил из ashell :3
         List<String> output = new ArrayList<>();
         ShizukuRemoteProcess process = null;
         String currentDir = "/";
