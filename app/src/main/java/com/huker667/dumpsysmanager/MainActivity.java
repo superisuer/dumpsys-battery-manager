@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.InputStreamReader;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -92,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton(getString(R.string.yes), (dialog, which) -> {
                             outputtext.setText(executeCommand("dumpsys battery set level " + numtext.getText().toString()));
                             outputtext.setText(outputtext.getText() + "\n" + executeCommand("dumpsys battery set counter " + mkatext.getText().toString()));
-                            outputtext.setText(outputtext.getText() + "\n" + executeCommand("dumpsys battery set temp " + seekBar.getProgress()));
+                            int seekBarTemperature = seekBar.getProgress() - 300;
+                            outputtext.setText(outputtext.getText() + "\n" + executeCommand("dumpsys battery set temp " + seekBarTemperature));
 
                             getValues();
                         })
@@ -102,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         reset_button.setOnClickListener(v -> {
-            
             outputtext.setText(executeCommand("dumpsys battery reset"));
             getValues();
         });
@@ -163,22 +165,34 @@ public class MainActivity extends AppCompatActivity {
         numtext.setText(levelStr);
         mkatext.setText(counterStr);
 
-        int temp = Integer.parseInt(tempStr);
+        int temp = Integer.parseInt(tempStr) + 300;
 
         seekBar.setProgress(temp);
-        double tempCelsius = temp / 10.0;
+        double tempCelsius = (temp - 300) / 10.0;
+        if (Integer.parseInt(tempStr) < 0){
+            tempCelsius = tempCelsius * 1;
+
+        }
+        else{
+
+            //Toast.makeText(getApplicationContext(), "не", Toast.LENGTH_SHORT).show();
+
+        }
         @SuppressLint("DefaultLocale")
         String result = String.format("%.1f °C", tempCelsius);
         temp_text.setText(getString(R.string.temp) + " (" + result + ")");
     }
-    private String extractDigits(String input) { // REGEX FOR OPLUS BATTERY
-        return input.replaceAll("\\D", "");
+    private String extractDigits(String input) {
+        Matcher matcher = Pattern.compile("-?\\d+").matcher(input);
+        if (matcher.find()) return matcher.group();
+        return "";
     }
+
 
     private void requestSuperUser() {
         
         try {
-            Process process = Runtime.getRuntime().exec("su -c id"); // i use this command for root check
+            Process process = Runtime.getRuntime().exec("su -c id"); // i use this command for root checking
             process.waitFor();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
